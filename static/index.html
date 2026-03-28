@@ -286,6 +286,26 @@
     </div>
 </div>
 
+<!--  ADMIN LOGIN MODAL -->
+<div class="overlay" id="admin-login-modal">
+    <div class="modal">
+        <button class="modal-close" id="close-admin-login-modal" aria-label="Close">&times;</button>
+        <div class="modal-header">
+            <div class="modal-badge">ADMIN</div>
+            <h3>Admin Login</h3>
+            <p class="modal-seat-id">Enter password to proceed</p>
+        </div>
+        <div class="modal-body">
+            <div class="form-field">
+                <label>Password <span class="required">*</span></label>
+                <input type="password" id="admin-password" placeholder="Admin password">
+            </div>
+            <div class="error-msg" id="admin-login-error"></div>
+            <button class="btn-primary" id="admin-login-btn">Login</button>
+        </div>
+    </div>
+</div>
+
 <div class="toast" id="toast"></div>
 
 <script src="/static/js/api.js"></script>

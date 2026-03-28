@@ -15,7 +15,13 @@ function switchTab(tabName) {
     switch (tabName) {
         case 'seats': loadSeats?.();     break;
         case 'books': loadBorrows?.();   break;
-        case 'admin': loadAdminData?.(); break;
+        case 'admin':
+            if (typeof getAdminToken === 'function' && getAdminToken()) {
+                loadAdminData?.();
+            } else {
+                showModal?.('admin-login-modal');
+            }
+            break;
     }
 }
 

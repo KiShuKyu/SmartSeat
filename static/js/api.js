@@ -17,6 +17,11 @@ async function apiFetch(endpoint, method = 'GET', body = null) {
         options.body = JSON.stringify(body);
     }
 
+    try {
+        const token = getAdminToken();
+        if (token) options.headers['Authorization'] = `Bearer ${token}`;
+    } catch {}
+
     const response = await fetch(`${API_BASE}${endpoint}`, options);
 
     if (!response.ok) {
@@ -32,6 +37,19 @@ async function apiFetch(endpoint, method = 'GET', body = null) {
 
     const ct = response.headers.get('content-type') || '';
     return ct.includes('application/json') ? response.json() : response.text();
+}
+
+
+function getAdminToken() {
+    return localStorage.getItem('adminToken') || '';
+}
+
+function setAdminToken(token) {
+    if (token) localStorage.setItem('adminToken', token);
+}
+
+function clearAdminToken() {
+    localStorage.removeItem('adminToken');
 }
 
 

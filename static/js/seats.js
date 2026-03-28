@@ -5,7 +5,17 @@ let selectedDuration = 2;
 async function loadSeats() {
     try {
         const seats = await apiFetch('/api/seats');
-        renderSeatMap(seats);
+        const myUrnStr = localStorage.getItem('myUrn');
+        const myUrn = myUrnStr ? parseInt(myUrnStr, 10) : NaN;
+        const mapped = Array.isArray(seats)
+            ? seats.map(s => {
+                if (s && s.status === 'occupied' && !isNaN(myUrn) && s.urn === myUrn) {
+                    return { ...s, status: 'mine' };
+                }
+                return s;
+            })
+            : seats;
+        renderSeatMap(mapped);
         await loadStats();
     } catch (err) {
         console.error('Failed to load seats:', err);
@@ -149,6 +159,7 @@ async function confirmReservation() {
             student_name:   name,
             duration_hours: selectedDuration,
         });
+        localStorage.setItem('myUrn', String(urn));
         hideModal('reserve-modal');
         showToast(`✓ Seat ${currentSeatToReserve} reserved for ${selectedDuration} hour${selectedDuration > 1 ? 's' : ''}`);
         loadSeats();
@@ -185,6 +196,10 @@ async function confirmRelease() {
 
     try {
         await apiFetch('/api/release', 'POST', { seat_id: seat.id, urn });
+        const stored = localStorage.getItem('myUrn');
+        if (stored && parseInt(stored, 10) === urn) {
+            localStorage.removeItem('myUrn');
+        }
         hideModal('release-modal');
         showToast(`Seat ${seat.id} released — see you next time!`);
         loadSeats();

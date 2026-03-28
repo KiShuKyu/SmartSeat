@@ -324,4 +324,34 @@ document.addEventListener('DOMContentLoaded', () => {
         ?.addEventListener('click', exportData);
     document.getElementById('reset-demo-data-btn')
         ?.addEventListener('click', resetDemoData);
+    document.getElementById('admin-login-btn')
+        ?.addEventListener('click', adminLogin);
+    document.getElementById('admin-password')
+        ?.addEventListener('keydown', e => { if (e.key === 'Enter') adminLogin(); });
+    document.getElementById('close-admin-login-modal')
+        ?.addEventListener('click', () => hideModal?.('admin-login-modal'));
 });
+
+async function adminLogin() {
+    const input = document.getElementById('admin-password');
+    const errEl = document.getElementById('admin-login-error');
+    if (!input) return;
+    const password = input.value.trim();
+    if (!password) {
+        if (errEl) { errEl.textContent = 'Please enter password'; errEl.style.display = 'block'; }
+        return;
+    }
+    if (errEl) errEl.style.display = 'none';
+    try {
+        const res = await apiFetch('/api/admin/login', 'POST', { password });
+        if (res && res.token) {
+            setAdminToken(res.token);
+            hideModal?.('admin-login-modal');
+            switchTab?.('admin');
+        } else {
+            if (errEl) { errEl.textContent = 'Invalid response'; errEl.style.display = 'block'; }
+        }
+    } catch (err) {
+        if (errEl) { errEl.textContent = err.message; errEl.style.display = 'block'; }
+    }
+}

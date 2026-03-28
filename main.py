@@ -1,4 +1,4 @@
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Request
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
 from pydantic import BaseModel
@@ -6,10 +6,15 @@ from typing import Optional
 import sqlite3
 import datetime
 import os
+from dotenv import load_dotenv
+
+load_dotenv()
 
 app = FastAPI(title="SmartSeat", version="2.0.0")
 
 DB_PATH = "smartseat.db"
+ADMIN_PASSWORD = os.environ.get("ADMIN_PASSWORD")
+ADMIN_TOKEN = os.environ.get("ADMIN_TOKEN")
 
 # Database 
 
@@ -100,6 +105,8 @@ class BorrowRequest(BaseModel):
 
 class ReturnRequest(BaseModel):
     record_id: int
+class AdminLoginRequest(BaseModel):
+    password: str
 
 # API Endpoints
 
@@ -321,20 +328,9 @@ async def log_entry(data: dict):
 
 
 # Admin Endpoints 
-
-@app.post("/api/admin/clear-returned")
-async def clear_returned_books():
-    conn = get_conn()
-    cur = conn.cursor()
-    cur.execute("DELETE FROM borrows WHERE returned=1")
-    deleted = cur.rowcount
-    conn.commit()
-    conn.close()
-    return {"message": f"Cleared {deleted} returned book records"}
-
-
 @app.post("/api/admin/clear-expired")
-async def clear_expired_reservations():
+async def clear_expired_reservations(request: Request):
+    _require_admin(request)
     conn = get_conn()
     cur = conn.cursor()
     _expire_seats(cur)
@@ -345,7 +341,8 @@ async def clear_expired_reservations():
 
 
 @app.post("/api/admin/reset-demo")
-async def reset_demo_data():
+async def reset_demo_data(request: Request):
+    _require_admin(request)
     conn = get_conn()
     cur = conn.cursor()
     cur.execute("DELETE FROM borrows")
@@ -357,6 +354,21 @@ async def reset_demo_data():
     conn.commit()
     conn.close()
     return {"message": "All data reset successfully"}
+@app.post("/api/admin/clear-returned")
+async def clear_returned_books(request: Request):
+    _require_admin(request)
+    conn = get_conn()
+    cur = conn.cursor()
+    cur.execute("DELETE FROM borrows WHERE returned=1")
+    deleted = cur.rowcount
+    conn.commit()
+    conn.close()
+    return {"message": f"Cleared {deleted} returned book records"}
+@app.post("/api/admin/login")
+async def admin_login(req: AdminLoginRequest):
+    if req.password != ADMIN_PASSWORD:
+        raise HTTPException(401, "Invalid admin credentials")
+    return {"token": ADMIN_TOKEN}
 
 
 #Static files & root 
@@ -371,3 +383,11 @@ async def root():
 @app.on_event("startup")
 async def startup_event():
     init_db()
+
+def _require_admin(request: Request):
+    auth = request.headers.get("authorization") or request.headers.get("Authorization")
+    if not auth or not auth.startswith("Bearer "):
+        raise HTTPException(401, "Admin authorization required")
+    token = auth.split(" ", 1)[1]
+    if token != ADMIN_TOKEN:
+        raise HTTPException(403, "Invalid admin token")
