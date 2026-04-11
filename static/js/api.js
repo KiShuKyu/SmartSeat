@@ -5,15 +5,20 @@ const API_BASE = '';
  * @param {string} endpoint
  * @param {'GET'|'POST'|'PUT'|'DELETE'} method
  * @param {object|null} body
+ * @param {boolean} raw - if true, body is sent as FormData (for file uploads)
  * @returns {Promise<any>}
  */
-async function apiFetch(endpoint, method = 'GET', body = null) {
+async function apiFetch(endpoint, method = 'GET', body = null, raw = false) {
     const options = {
         method,
-        headers: { 'Content-Type': 'application/json' },
+        headers: {},
     };
 
-    if (body !== null) {
+    if (raw) {
+        // FormData — don't set Content-Type, let the browser set it with boundary
+        options.body = body;
+    } else if (body !== null) {
+        options.headers['Content-Type'] = 'application/json';
         options.body = JSON.stringify(body);
     }
 

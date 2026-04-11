@@ -897,13 +897,13 @@ body {
 @media (max-width: 768px) {
     .stats-grid, .admin-stats-grid { grid-template-columns: repeat(2, 1fr); }
     .two-columns { grid-template-columns: 1fr; }
-    .nav-tabs { gap: .1rem; }
+    .nav-tabs { gap: .1rem; flex-wrap: wrap; }
     .nav-btn { padding: .4rem .7rem; font-size: .78rem; }
     .page { padding: 1rem; }
     .clusters-area { gap: 1rem; }
     .seat { width: 40px; height: 40px; font-size: .62rem; }
     .filter-group { margin-left: 0; margin-top: .5rem; }
-    .admin-actions { gap: .5rem; }
+    .admin-actions { gap: .5rem; flex-wrap: wrap; }
     .search-row { gap: .5rem; }
     .admin-actions .btn-secondary,
     .admin-actions .btn-danger-outline { font-size: .78rem; padding: .45rem .8rem; }
@@ -913,4 +913,272 @@ body {
     .stats-grid { grid-template-columns: repeat(2, 1fr); }
     .stat-number { font-size: 1.8rem; }
     .logo-text { display: none; }
+}
+
+/* ─── Due Date & Penalty Warning (Book Borrow) ─── */
+.due-info {
+    display: flex;
+    align-items: baseline;
+    gap: .5rem;
+    background: var(--paper);
+    border: 1px solid var(--paper-border);
+    border-radius: var(--radius-sm);
+    padding: .6rem .9rem;
+    margin-bottom: .75rem;
+}
+
+.due-label {
+    font-size: .82rem;
+    font-weight: 600;
+    color: var(--ink-soft);
+}
+
+.due-date-val {
+    font-family: 'DM Mono', monospace;
+    font-size: .9rem;
+    color: var(--green);
+    font-weight: 500;
+}
+
+.penalty-warning {
+    font-size: .78rem;
+    color: var(--red);
+    background: rgba(139,46,46,.06);
+    border: 1px solid rgba(139,46,46,.15);
+    border-radius: var(--radius-sm);
+    padding: .5rem .75rem;
+    margin-bottom: .75rem;
+}
+
+/* ─── Availability Badge ─── */
+.avail-badge {
+    display: inline-block;
+    padding: .15rem .55rem;
+    border-radius: 20px;
+    font-family: 'DM Mono', monospace;
+    font-size: .75rem;
+    font-weight: 500;
+}
+
+.avail-yes {
+    background: rgba(46,89,67,.1);
+    color: var(--green);
+}
+
+.avail-no {
+    background: rgba(139,46,46,.08);
+    color: var(--red);
+}
+
+.unavailable-text {
+    font-size: .78rem;
+    color: var(--ink-muted);
+    font-style: italic;
+}
+
+/* ─── Guidelines Modal ─── */
+.modal-guidelines {
+    max-width: 440px;
+}
+
+.guidelines-list {
+    list-style: none;
+    padding: 0;
+    margin: 0 0 1rem;
+}
+
+.guidelines-list li {
+    padding: .5rem 0;
+    font-size: .88rem;
+    color: var(--ink);
+    border-bottom: 1px solid rgba(216,204,180,.4);
+}
+
+.guidelines-list li:last-child { border-bottom: none; }
+
+.guidelines-checkbox {
+    display: flex;
+    align-items: center;
+    gap: .5rem;
+    margin-bottom: 1rem;
+    font-size: .85rem;
+    color: var(--ink-soft);
+    cursor: pointer;
+}
+
+.guidelines-checkbox input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+    accent-color: var(--brass);
+    cursor: pointer;
+}
+
+.guidelines-book-info {
+    background: rgba(184,137,42,.06);
+    border: 1px solid rgba(184,137,42,.2);
+    border-radius: var(--radius-sm);
+    padding: .6rem .9rem;
+    font-size: .83rem;
+    color: var(--ink-soft);
+    margin-bottom: 1rem;
+    line-height: 1.6;
+}
+
+.guidelines-actions {
+    display: flex;
+    flex-direction: column;
+    gap: .5rem;
+}
+
+.guidelines-actions .btn-secondary {
+    width: 100%;
+    justify-content: center;
+}
+
+/* ─── Return Confirmation Modal ─── */
+.return-details {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: .5rem;
+    margin-bottom: 1rem;
+}
+
+.return-detail-row {
+    background: var(--paper);
+    border: 1px solid var(--paper-border);
+    border-radius: var(--radius-sm);
+    padding: .5rem .75rem;
+}
+
+.return-detail-label {
+    display: block;
+    font-size: .7rem;
+    text-transform: uppercase;
+    letter-spacing: .05em;
+    color: var(--ink-muted);
+    font-weight: 600;
+    margin-bottom: .15rem;
+}
+
+.return-detail-row span:last-child {
+    font-size: .88rem;
+    color: var(--ink);
+}
+
+.penalty-display {
+    background: rgba(139,46,46,.06);
+    border: 1px solid rgba(139,46,46,.2);
+    border-radius: var(--radius);
+    padding: 1rem;
+    text-align: center;
+}
+
+.penalty-label {
+    font-size: .75rem;
+    text-transform: uppercase;
+    letter-spacing: .06em;
+    color: var(--red);
+    font-weight: 600;
+    margin-bottom: .25rem;
+}
+
+.penalty-amount {
+    font-family: 'DM Serif Display', serif;
+    font-size: 2rem;
+    color: var(--red);
+    line-height: 1;
+    margin-bottom: .25rem;
+}
+
+.penalty-days {
+    font-size: .8rem;
+    color: var(--ink-muted);
+}
+
+.on-time-msg {
+    background: rgba(46,89,67,.06);
+    border: 1px solid rgba(46,89,67,.15);
+    border-radius: var(--radius-sm);
+    padding: .75rem 1rem;
+    font-size: .88rem;
+    color: var(--green);
+    text-align: center;
+    font-weight: 500;
+}
+
+/* ─── Excel Upload ─── */
+.upload-section {
+    background: var(--paper);
+    border: 1px solid var(--paper-border);
+    border-radius: var(--radius-sm);
+    padding: 1rem;
+    margin-bottom: .5rem;
+}
+
+.upload-info {
+    font-size: .82rem;
+    color: var(--ink-soft);
+    margin-bottom: .75rem;
+}
+
+.upload-row {
+    display: flex;
+    gap: .75rem;
+    align-items: center;
+}
+
+.file-input {
+    font-size: .82rem;
+    color: var(--ink-soft);
+    font-family: 'DM Sans', sans-serif;
+}
+
+.file-input::file-selector-button {
+    padding: .45rem .9rem;
+    border: 1px solid var(--paper-border);
+    border-radius: var(--radius-sm);
+    background: white;
+    color: var(--ink);
+    font-family: 'DM Sans', sans-serif;
+    font-size: .8rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all var(--transition);
+}
+
+.file-input::file-selector-button:hover {
+    background: var(--ink);
+    color: var(--paper);
+    border-color: var(--ink);
+}
+
+/* ─── Loan Status ─── */
+.status-overdue {
+    background: rgba(139,46,46,.1);
+    color: var(--red);
+    border: 1px solid rgba(139,46,46,.2);
+}
+
+.action-btn {
+    padding: .35rem .8rem;
+    background: var(--ink);
+    color: var(--paper);
+    border: none;
+    border-radius: var(--radius-sm);
+    font-size: .78rem;
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all var(--transition);
+    white-space: nowrap;
+}
+
+.action-btn:hover:not(:disabled) {
+    background: #3d2e1e;
+    transform: translateY(-1px);
+}
+
+.action-btn:disabled {
+    opacity: .5;
+    cursor: not-allowed;
 }

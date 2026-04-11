@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
     <title>SmartSeat — Library Management</title>
     <link rel="stylesheet" href="/static/css/style.css">
-    <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@400;500&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,300&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@400;500&family=DM+Sans:ital,opsiz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,300&display=swap" rel="stylesheet">
 </head>
 <body>
 
@@ -23,6 +23,9 @@
         </button>
         <button class="nav-btn" data-tab="books">
             <span class="nav-icon">◎</span> Book Borrow
+        </button>
+        <button class="nav-btn" data-tab="browse">
+            <span class="nav-icon">📚</span> Browse Books
         </button>
         <button class="nav-btn" data-tab="admin">
             <span class="nav-icon">⊛</span> Admin
@@ -102,6 +105,18 @@
                 <label>Author <span class="optional">optional</span></label>
                 <input type="text" id="borrow-author" placeholder="Author name">
             </div>
+
+            <!-- Due date & penalty warning (shown for inventory borrows) -->
+            <div id="borrow-due-display" style="display:none;">
+                <div class="due-info">
+                    <span class="due-label">Due Date:</span>
+                    <span id="borrow-due-date" class="due-date-val">—</span>
+                </div>
+                <div class="penalty-warning">
+                    ⚠ Late return incurs a penalty of ₹50 per day. Book must be returned within 15 days.
+                </div>
+            </div>
+
             <button class="btn-primary" id="borrow-btn">Borrow Book</button>
         </div>
 
@@ -113,6 +128,44 @@
             <div class="scroll-list" id="borrow-list">
                 <div class="empty-state">No active borrows</div>
             </div>
+        </div>
+    </div>
+</div>
+
+<!--  BROWSE BOOKS PAGE -->
+<div class="page" id="page-browse">
+    <div class="card">
+        <div class="card-header" style="flex-wrap:wrap;gap:.5rem;">
+            <div style="display:flex;align-items:center;gap:.75rem;">
+                <div class="card-icon">📚</div>
+                <h3>Browse Library Books</h3>
+            </div>
+        </div>
+
+        <div class="search-row" style="margin-bottom:1rem;">
+            <div class="form-field" style="flex:1;margin-bottom:0;">
+                <input type="text" id="browse-search" placeholder="Search by title or author…">
+            </div>
+            <button class="btn-primary compact" id="browse-search-btn">Search</button>
+            <button class="btn-secondary compact" id="browse-show-all">Show All</button>
+        </div>
+
+        <div class="table-wrapper">
+            <table class="admin-table" id="browse-table">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Title</th>
+                        <th>Author</th>
+                        <th>Shelf</th>
+                        <th>Available</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody id="browse-table-body">
+                    <tr><td colspan="6" class="table-empty">Loading…</td></tr>
+                </tbody>
+            </table>
         </div>
     </div>
 </div>
@@ -130,8 +183,8 @@
             <div class="stat-label">Currently Out</div>
         </div>
         <div class="stat-panel mini">
-            <div class="stat-number" id="admin-total-returns">—</div>
-            <div class="stat-label">Total Returns</div>
+            <div class="stat-number" id="admin-active-loans">—</div>
+            <div class="stat-label">Active Loans</div>
         </div>
         <div class="stat-panel mini">
             <div class="stat-number" id="admin-total-reservations">—</div>
@@ -139,18 +192,22 @@
         </div>
     </div>
 
+    <!-- Admin actions row -->
     <div class="admin-actions">
         <button class="btn-secondary" id="clear-returned-books-btn">
             <span></span> Clear Returned History
         </button>
+        <button class="btn-secondary" id="clear-returned-loans-btn">
+            <span></span> Clear Returned Loans
+        </button>
         <button class="btn-secondary" id="clear-old-reservations-btn">
-            <span>🗑</span> Clear Expired Seats
+            <span></span> Clear Expired Seats
         </button>
         <button class="btn-secondary" id="export-data-btn">
-            <span>↓</span> Export CSV
+            <span></span> Export CSV
         </button>
         <button class="btn-danger-outline" id="reset-demo-data-btn">
-            <span>⚠</span> Reset All Data
+            <span></span> Reset All Data
         </button>
     </div>
 
@@ -175,10 +232,72 @@
         </div>
     </div>
 
+    <!-- Active Book Loans -->
+    <div class="card">
+        <div class="card-header">
+            <div class="card-icon">📖</div>
+            <h3>Active Book Loans</h3>
+        </div>
+        <div class="table-wrapper">
+            <table class="admin-table">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>URN</th>
+                        <th>Student</th>
+                        <th>Book Title</th>
+                        <th>Borrow Date</th>
+                        <th>Due Date</th>
+                        <th>Status</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody id="admin-loans-body">
+                    <tr><td colspan="8" class="table-empty">Loading…</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Book Inventory Management -->
+    <div class="card">
+        <div class="card-header">
+            <div class="card-icon">📦</div>
+            <h3>Book Inventory</h3>
+        </div>
+        <div class="upload-section">
+            <div class="upload-info">
+                Upload an Excel (.xlsx) file with columns: <strong>title, author, shelf, quantity</strong>
+            </div>
+            <div class="upload-row">
+                <input type="file" id="excel-file-input" accept=".xlsx,.xls" class="file-input">
+                <button class="btn-primary compact" id="upload-books-btn">Upload &amp; Import</button>
+            </div>
+            <div class="error-msg" id="upload-error"></div>
+        </div>
+        <div class="table-wrapper" style="margin-top:1rem;">
+            <table class="admin-table">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Title</th>
+                        <th>Author</th>
+                        <th>Shelf</th>
+                        <th>Quantity</th>
+                        <th>Available</th>
+                    </tr>
+                </thead>
+                <tbody id="admin-inventory-body">
+                    <tr><td colspan="6" class="table-empty">Loading…</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
     <!-- Quick Book Return -->
     <div class="card">
         <div class="card-header">
-            <div class="card-icon">◎</div>
+            <div class="card-icon">◑</div>
             <h3>Quick Book Return</h3>
         </div>
         <div class="search-row">
@@ -192,8 +311,13 @@
             <table class="admin-table">
                 <thead>
                     <tr>
-                        <th>#</th><th>URN</th><th>Student</th>
-                        <th>Book Title</th><th>Author</th><th>Borrowed</th><th>Action</th>
+                        <th>#</th>
+                        <th>URN</th>
+                        <th>Student</th>
+                        <th>Book Title</th>
+                        <th>Author</th>
+                        <th>Borrowed</th>
+                        <th>Action</th>
                     </tr>
                 </thead>
                 <tbody id="return-borrows-body">
@@ -286,6 +410,85 @@
     </div>
 </div>
 
+<!--  GUIDELINES MODAL -->
+<div class="overlay" id="guidelines-modal">
+    <div class="modal modal-guidelines">
+        <button class="modal-close" id="close-guidelines-modal" aria-label="Close">&times;</button>
+        <div class="modal-header">
+            <div class="modal-badge">BOOKS</div>
+            <h3>Borrowing Guidelines</h3>
+        </div>
+        <div class="modal-body">
+            <div class="guidelines-book-info" id="guidelines-book-info"></div>
+            <ul class="guidelines-list">
+                <li><strong>Loan Period:</strong> 15 days from today</li>
+                <li><strong>Late Return Penalty:</strong> ₹50 per day after due date</li>
+                <li><strong>Maximum:</strong> 3 books per student</li>
+                <li><strong>Lost/Damaged:</strong> Replacement cost + ₹200 fine</li>
+            </ul>
+            <div class="form-field">
+                <label>Your URN <span class="required">*</span></label>
+                <input type="number" id="guidelines-urn" placeholder="e.g. 2024001" step="1" min="1">
+            </div>
+            <div class="form-field">
+                <label>Your Full Name <span class="required">*</span></label>
+                <input type="text" id="guidelines-name" placeholder="Full name">
+            </div>
+            <label class="guidelines-checkbox">
+                <input type="checkbox" id="guidelines-checkbox">
+                <span>I have read and agree to the guidelines</span>
+            </label>
+            <div class="guidelines-actions">
+                <button class="btn-primary" id="guidelines-confirm-btn" disabled>Confirm Borrow</button>
+                <button class="btn-secondary" id="guidelines-cancel-btn">Cancel</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!--  RETURN CONFIRMATION MODAL (with penalty) -->
+<div class="overlay" id="return-confirm-modal">
+    <div class="modal">
+        <button class="modal-close" id="close-return-confirm-modal" aria-label="Close">&times;</button>
+        <div class="modal-header">
+            <div class="modal-badge">RETURN</div>
+            <h3>Return Book</h3>
+            <p class="modal-seat-id" id="return-book-title">—</p>
+        </div>
+        <div class="modal-body">
+            <div class="return-details" id="return-details">
+                <div class="return-detail-row">
+                    <span class="return-detail-label">Student:</span>
+                    <span id="return-student">—</span>
+                </div>
+                <div class="return-detail-row">
+                    <span class="return-detail-label">URN:</span>
+                    <span id="return-urn">—</span>
+                </div>
+                <div class="return-detail-row">
+                    <span class="return-detail-label">Borrow Date:</span>
+                    <span id="return-borrow-date">—</span>
+                </div>
+                <div class="return-detail-row">
+                    <span class="return-detail-label">Due Date:</span>
+                    <span id="return-due-date">—</span>
+                </div>
+            </div>
+            <div class="penalty-display" id="penalty-display" style="display:none;">
+                <div class="penalty-label">Late Return</div>
+                <div class="penalty-amount" id="penalty-amount">₹0</div>
+                <div class="penalty-days" id="penalty-days"></div>
+            </div>
+            <div class="on-time-msg" id="on-time-msg" style="display:none;">
+                This book is being returned on time. No penalty applies.
+            </div>
+            <div style="margin-top:1rem;">
+                <button class="btn-primary" id="confirm-return-btn">Confirm Return</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <!--  ADMIN LOGIN MODAL -->
 <div class="overlay" id="admin-login-modal">
     <div class="modal">
@@ -311,6 +514,7 @@
 <script src="/static/js/api.js"></script>
 <script src="/static/js/seats.js"></script>
 <script src="/static/js/books.js"></script>
+<script src="/static/js/browse.js"></script>
 <script src="/static/js/admin.js"></script>
 <script src="/static/js/app.js"></script>
 </body>

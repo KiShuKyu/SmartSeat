@@ -1,6 +1,6 @@
 const POLL_INTERVAL = 10_000; // 10 seconds
 
-// Tab switching 
+// Tab switching
 
 function switchTab(tabName) {
     document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
@@ -11,11 +11,18 @@ function switchTab(tabName) {
     const page = document.getElementById(`page-${tabName}`);
     if (page) page.classList.add('active');
 
+    // Lock admin when navigating away — require re-auth on return
+    if (tabName !== 'admin' && typeof clearAdminToken === 'function') {
+        clearAdminToken();
+    }
+
     // Eagerly refresh data for the newly visible tab
     switch (tabName) {
         case 'seats': loadSeats?.();     break;
         case 'books': loadBorrows?.();   break;
+        case 'browse': loadBrowse?.();   break;
         case 'admin':
+            // Always show login on entering admin — session-only
             if (typeof getAdminToken === 'function' && getAdminToken()) {
                 loadAdminData?.();
             } else {
@@ -25,7 +32,7 @@ function switchTab(tabName) {
     }
 }
 
-// Polling 
+// Polling
 
 function startPolling() {
     setInterval(() => {
@@ -35,12 +42,17 @@ function startPolling() {
         switch (active.id) {
             case 'page-seats': loadSeats?.();     break;
             case 'page-books': loadBorrows?.();   break;
-            case 'page-admin': loadAdminData?.(); break;
+            case 'page-browse': loadBrowse?.();   break;
+            case 'page-admin':
+                if (typeof getAdminToken === 'function' && getAdminToken()) {
+                    loadAdminData?.();
+                }
+                break;
         }
     }, POLL_INTERVAL);
 }
 
-// Init 
+// Init
 
 document.addEventListener('DOMContentLoaded', () => {
     // Wire nav buttons
@@ -50,6 +62,9 @@ document.addEventListener('DOMContentLoaded', () => {
             if (tab) switchTab(tab);
         });
     });
+
+    switchTab('seats');
+    clearAdminToken();
 
     // Initial load
     loadSeats?.();
